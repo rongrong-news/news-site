@@ -1,9 +1,9 @@
 name: Daily News Update
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'  # 每天 00:00 UTC 自动运行
-  workflow_dispatch:      # 手动运行按钮
+    - cron: '0 0 * * *'  # 每天凌晨 UTC 自动运行
 
 jobs:
   update-news:
@@ -11,25 +11,25 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.10   # ✅ 正确版本
+          python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install openai
         run: pip install openai
 
-      - name: Generate Daily News
+      - name: Run update script
         run: python news_updater.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Commit and Push
+      - name: Commit and push changes
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git add index.html
-          git commit -m "🔄 Update daily news"
+          git commit -m "🔄 Auto update daily news"
           git push
