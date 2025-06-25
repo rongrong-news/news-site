@@ -3,7 +3,7 @@ name: Daily News Update
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'  # 每天凌晨 UTC 自动运行
+    - cron: '0 0 * * *'
 
 jobs:
   update-news:
@@ -18,10 +18,10 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install openai
+      - name: Install dependencies
         run: pip install openai
 
-      - name: Run update script
+      - name: Run news update script
         run: python news_updater.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
