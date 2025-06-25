@@ -1,36 +1,38 @@
 import openai
-import os
 import datetime
+import os
 
+# Get API key from environment variable (for GitHub Actions)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def get_news():
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant that summarizes news."},
-        {"role": "user", "content": (
-            "Give me short daily news summaries in the following categories:\n"
-            "1. World news\n2. US stock news\n3. China news\n4. China stock news\n"
-            "5. Singapore news\n6. Singapore stock news\n7. Technology news"
-        )}
-    ]
     response = openai.ChatCompletion.create(
         model="gpt-4o",
-        messages=messages
+        messages=[
+            {"role": "system", "content": "You are a professional news summarizer."},
+            {"role": "user", "content": "Give me a 3-paragraph summary of today’s top tech and world news. Keep it concise, informative, and web-friendly."}
+        ]
     )
-    return response.choices[0].message.content
+    return response['choices'][0]['message']['content']
 
 def update_html(news_text):
-    today = datetime.date.today().strftime("%Y-%m-%d")
-    html = f"""<!DOCTYPE html>
-<html lang='en'>
-<head><meta charset='UTF-8'><title>News {today}</title></head>
+    # Replace line breaks with HTML <br> tags
+    html_content = news_text.replace('\n', '<br><br>')
+
+    html_template = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Daily News Summary</title>
+</head>
 <body>
-  <h1>📰 News Summary – {today}</h1>
-  <div>{news_text.replace("\n", "<br><br>")}</div>
+  <h1>📰 Daily News — {datetime.date.today().strftime('%B %d, %Y')}</h1>
+  <div>{html_content}</div>
 </body>
 </html>"""
+
     with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html)
+        f.write(html_template)
 
 if __name__ == "__main__":
     news = get_news()
