@@ -1,42 +1,37 @@
 import openai
+import os
 import datetime
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def get_chatgpt_news():
-    categories = [
-        "latest world news",
-        "latest US stock news",
-        "latest China news",
-        "latest China stock news",
-        "latest Singapore news",
-        "latest Singapore stock news",
-        "latest technology development news"
+def get_news():
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant that summarizes news."},
+        {"role": "user", "content": (
+            "Give me short daily news summaries in the following categories:\n"
+            "1. World news\n2. US stock news\n3. China news\n4. China stock news\n"
+            "5. Singapore news\n6. Singapore stock news\n7. Technology news"
+        )}
     ]
-    messages = [{"role": "system", "content": "You are a helpful assistant summarizing daily news."}]
-    messages.append({"role": "user", "content": "Give me today's news summary in the following categories:
-" + "\n".join(categories)})
-
     response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=messages
     )
-    return response["choices"][0]["message"]["content"]
+    return response.choices[0].message.content
 
-def write_html(news_text):
+def update_html(news_text):
     today = datetime.date.today().strftime("%Y-%m-%d")
     html = f"""<!DOCTYPE html>
-<html>
-<head><meta charset='UTF-8'><title>Daily News {today}</title></head>
+<html lang='en'>
+<head><meta charset='UTF-8'><title>News {today}</title></head>
 <body>
-  <h1>📰 Daily News – {today}</h1>
+  <h1>📰 News Summary – {today}</h1>
   <div>{news_text.replace("\n", "<br><br>")}</div>
 </body>
-</html>
-"""
+</html>"""
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
 if __name__ == "__main__":
-    news = get_chatgpt_news()
-    write_html(news)
+    news = get_news()
+    update_html(news)
